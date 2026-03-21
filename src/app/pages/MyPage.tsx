@@ -1,10 +1,13 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { mockExams } from '../data/mockExams';
+import api from '../utils/api';
+
 import {
   User,
   Mail,
+  Phone,
   Calendar as CalendarIcon,
   Edit,
   Plus,
@@ -21,16 +24,18 @@ import { format, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval, startOf
 import { ko } from 'date-fns/locale';
 
 interface PersonalEvent {
-  id: string;
+  id: number;
   title: string;
-  date: string;
-  type: 'study' | 'exam' | 'deadline' | 'other';
+  date: string; 
+  type: 'STUDY' | 'EXAM' | 'DEADLINE' | 'OTHER'; 
   description?: string;
 }
 
 export default function MyPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date('2026-03-13'));
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [personalEvents, setPersonalEvents] = useState<PersonalEvent[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<{
@@ -46,7 +51,9 @@ export default function MyPage() {
   // Redirect to login if not authenticated
   const { user } = useAuth();
   const navigate = useNavigate();
-  if (!user) {
+  
+  if (!user && !localStorage.getItem('userId')) { 
+    // Context에도 유저가 없고, 스토리지에도 ID가 아예 없을 때만 튕기게 함
     navigate('/login');
     return null;
   }
@@ -55,44 +62,49 @@ export default function MyPage() {
   const [profile, setProfile] = useState({
     name: '홍길동',
     email: 'hong@example.com',
+    phone: '010-1234-5678',
+    bio: '공무원 시험 준비중입니다.',
     avatar: '',
   });
 
+  useEffect(() => {
+      loadEvents();
+  }, []);
+
   // Mock personal events
-  const [personalEvents, setPersonalEvents] = useState<PersonalEvent[]>([
-    {
-      id: '1',
-      title: '국어 모의고사',
-      date: '2026-03-15',
-      type: 'study',
-      description: '국어 실전 모의고사 풀이',
-    },
-    {
-      id: '2',
-      title: '행정법 스터디',
-      date: '2026-03-18',
-      type: 'study',
-      description: '주간 스터디 모임',
-    },
-    {
-      id: '3',
-      title: '영어 단어 암기',
-      date: '2026-03-20',
-      type: 'study',
-    },
-    {
-      id: '4',
-      title: '모의시험',
-      date: '2026-03-25',
-      type: 'exam',
-      description: '최종 모의시험',
-    },
-  ]);
+  const loadEvents = async () => {
+    try {
+      setLoading(true);
+      const storedUserId = localStorage.getItem('userId');
+      console.log(">>>> storedUserId : ", storedUserId);
+
+      if (!storedUserId) {
+        console.error("사용자 ID가 없습니다. 로그인이 필요합니다.");
+        navigate('/login');
+        return;
+      }
+
+      const response = await api.get('/personalEvent/list', {
+        headers: {
+          'X-User-Id': storedUserId
+        }
+      });
+
+      console.log(">>>> personalEvent data : ", response.data);
+      setPersonalEvents(response.data);
+
+    } catch (err) {
+      console.error("일정 로드 실패 (PersonalEvent 서비스 통신 에러):", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const [newEvent, setNewEvent] = useState<Partial<PersonalEvent>>({
     title: '',
     date: selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '',
-    type: 'study',
+    type: 'STUDY',
     description: '',
   });
 
@@ -113,18 +125,18 @@ export default function MyPage() {
 
   const getEventTypeColor = (type: string) => {
     switch (type) {
-      case 'study': return 'bg-blue-500';
-      case 'exam': return 'bg-red-500';
-      case 'deadline': return 'bg-orange-500';
+      case 'STUDY': return 'bg-blue-500';
+      case 'EXAM': return 'bg-red-500';
+      case 'DEADLINE': return 'bg-orange-500';
       default: return 'bg-gray-500';
     }
   };
 
   const getEventTypeName = (type: string) => {
     switch (type) {
-      case 'study': return '학습';
-      case 'exam': return '시험';
-      case 'deadline': return '마감';
+      case 'STUDY': return '학습';
+      case 'EXAM': return '시험';
+      case 'DEADLINE': return '마감';
       default: return '기타';
     }
   };
@@ -144,7 +156,7 @@ export default function MyPage() {
     }
 
     const event: PersonalEvent = {
-      id: Date.now().toString(),
+      id: Date.now(),
       title: newEvent.title,
       date: newEvent.date,
       type: newEvent.type as PersonalEvent['type'],
@@ -152,11 +164,11 @@ export default function MyPage() {
     };
 
     setPersonalEvents([...personalEvents, event]);
-    setNewEvent({ title: '', date: '', type: 'study', description: '' });
+    setNewEvent({ title: '', date: '', type: 'STUDY', description: '' });
     setIsAddEventOpen(false);
   };
 
-  const handleDeleteEvent = (id: string) => {
+  const handleDeleteEvent = (id: number) => {
     if (window.confirm('이 일정을 삭제하시겠습니까?')) {
       setPersonalEvents(personalEvents.filter(e => e.id !== id));
     }
@@ -170,19 +182,24 @@ export default function MyPage() {
   };
 
   const currentMonthEvents = useMemo(() => {
-    return personalEvents.filter(
-      (event) =>
-        new Date(event.date).getMonth() === currentMonth.getMonth() &&
-        new Date(event.date).getFullYear() === currentMonth.getFullYear()
-    );
+    if (!Array.isArray(personalEvents)) return [];
+    
+    return personalEvents.filter((event) => {
+      if (!event.date) return false; // 날짜가 없는 데이터 방지
+      const eventDate = new Date(event.date);
+      return (
+        eventDate.getMonth() === currentMonth.getMonth() &&
+        eventDate.getFullYear() === currentMonth.getFullYear()
+      );
+    });
   }, [personalEvents, currentMonth]);
 
   const currentMonthStudyEvents = useMemo(() => {
-    return currentMonthEvents.filter((event) => event.type === 'study');
+    return currentMonthEvents.filter((event) => event.type === 'STUDY');
   }, [currentMonthEvents]);
 
   const currentMonthExamEvents = useMemo(() => {
-    return currentMonthEvents.filter((event) => event.type === 'exam');
+    return currentMonthEvents.filter((event) => event.type === 'EXAM');
   }, [currentMonthEvents]);
 
   const favoriteExams = useMemo(() => {
@@ -279,6 +296,34 @@ export default function MyPage() {
                   />
                 ) : (
                   <span className="text-sm">{profile.email}</span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3 text-gray-600">
+                <Phone className="w-4 h-4" />
+                {editingProfile ? (
+                  <input
+                    type="tel"
+                    value={profile.phone}
+                    onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                    className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+                  />
+                ) : (
+                  <span className="text-sm">{profile.phone}</span>
+                )}
+              </div>
+
+              <div className="pt-4 border-t border-gray-200">
+                <label className="text-sm font-medium text-gray-700 mb-2 block">소개</label>
+                {editingProfile ? (
+                  <textarea
+                    value={profile.bio}
+                    onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    rows={3}
+                  />
+                ) : (
+                  <p className="text-sm text-gray-600">{profile.bio}</p>
                 )}
               </div>
 
