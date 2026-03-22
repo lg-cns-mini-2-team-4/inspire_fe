@@ -29,35 +29,24 @@
 export interface Exam {
   id: string;
   name: string;
-  category: ExamCategory;
+  category: ExamCategory;      // 대직무분야
+  mediumCategory: string;      // 중직무분야
   
-  // 1. 필기 일정 (백엔드 written... 대응)
+  // 날짜 데이터 (10종)
   writtenRegStart: string;
   writtenRegEnd: string;
   writtenExamStart: string;
   writtenExamEnd: string;
-  
-  // 2. 실기 일정 (백엔드 practical... 대응)
+  writtenPassDate: string;     // 추가
   practicalRegStart: string;
   practicalRegEnd: string;
   practicalExamStart: string;
   practicalExamEnd: string;
+  practicalPassDate: string;   // 추가
 
-  // 3. 기존 필드 및 공통 정보
-  testDate: string;             // UI 호환성을 위해 writtenExamStart를 주로 할당
-  applicationStartDate: string; // writtenRegStart 할당
-  applicationEndDate: string;   // writtenRegEnd 할당
-  
-  description?: string;
-  organizationName: string;     // 백엔드의 officeName 대응
-  location?: string;            // 백엔드의 examLocation 대응
   status: ExamStatus;
-  
-  // 선택적 상세 정보
-  resultDate?: string;
-  website?: string;
-  eligibility?: string;
-  subjects?: string[];
+  description?: string;
+
 }
 
 export type ExamCategory =
