@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../api/authApi';
 import { Calendar, Mail, Lock, AlertCircle } from 'lucide-react';
+import kakaoIcon from '../../assets/kakao_icons.png'; 
+import naverIcon from '../../assets/naver_icon.png'; 
+import googleIcon from '../../assets/google_icon.png';
 
 export default function Login() {
   const api = authApi();
@@ -130,24 +133,32 @@ export default function Login() {
               </div>
             </div>
 
-            <div className="mt-6 space-y-3">
-              <button
-                onClick={() => oauthLogin('naver')}
-                className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-green-600 text-green-600 hover:bg-green-50 transition-colors"
-              >
-                네이버
-              </button>
-              <button
-                onClick={() => oauthLogin('google')}
-                className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-red-600 text-red-600 hover:bg-red-50 transition-colors"
-              >
-                구글
-              </button>
+            <div className="mt-6 space-y-3 w-full max-w-sm mx-auto">
+              {/* 카카오 버튼 */}
               <button
                 onClick={() => oauthLogin('kakao')}
-                className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-yellow-500 text-yellow-600 hover:bg-yellow-50 transition-colors"
+                className="w-full flex items-center justify-center gap-3 py-4 px-4 rounded-xl bg-[#FEE500] text-[#191919] font-medium hover:bg-[#FADA0A] transition-colors"
               >
-                카카오
+                <img src={kakaoIcon} alt="카카오톡" className="w-8 h-8" />
+                <span className="flex-1 text-center pr-6">카카오톡으로 계속하기</span>
+              </button>
+
+              {/* 네이버 버튼 */}
+              <button
+                onClick={() => oauthLogin('naver')}
+                className="w-full flex items-center justify-center gap-3 py-4 px-4 rounded-xl bg-[#03C75A] text-white font-medium hover:bg-[#02b351] transition-colors"
+              >
+                <img src={naverIcon} alt="네이버" className="w-8 h-8" />
+                <span className="flex-1 text-center pr-6">네이버로 계속하기</span>
+              </button>
+
+              {/* 구글 버튼 */}
+              <button
+                onClick={() => oauthLogin('google')}
+                className="w-full flex items-center justify-center gap-3 py-4 px-4 rounded-xl bg-[#F2F2F2] text-[#191919] font-medium hover:bg-[#E5E5E5] transition-colors"
+              >
+                <img src={googleIcon} alt="구글" className="w-8 h-8" />
+                <span className="flex-1 text-center pr-6">구글로 계속하기</span>
               </button>
             </div>
 
