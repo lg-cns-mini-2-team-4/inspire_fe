@@ -21,5 +21,10 @@ export const authApi = () => {
         return res.data;
     }
 
+    const oauthSignup = async () => {
+        const res = await api.post('/auth/oauth/signup');
+        return res.data;
+    }
+
     return { signup, login, logout, reissue };
 };

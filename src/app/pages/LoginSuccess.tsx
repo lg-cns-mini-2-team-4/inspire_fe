@@ -12,11 +12,14 @@ export default function LoginSuccess() {
                 const token = await reissue();
                 console.log(token);
                 if(token) {
+                    console.log("해야지?");
                     navigate('/');
                 } else {
+                    console.log("안해야지?");
                     navigate('/login');
                 }
             }catch {
+                console.log("에러지?");
                 navigate('/login');
             }
         })();

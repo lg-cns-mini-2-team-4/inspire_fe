@@ -36,7 +36,7 @@ export default function Login() {
     }
   };
 
-    // OAuth 로그인 버튼 클릭 시 이동할 URL
+  // OAuth 로그인 버튼 클릭 시 이동할 URL
   const oauthLogin = (provider: 'naver' | 'google' | 'kakao') => {
     window.location.href = `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/${provider}`;
   };
@@ -119,16 +119,6 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">또는</span>
-              </div>
-            </div>
-
 
           <div className="mt-6">
             <div className="relative">
@@ -145,22 +135,22 @@ export default function Login() {
                 onClick={() => oauthLogin('naver')}
                 className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-green-600 text-green-600 hover:bg-green-50 transition-colors"
               >
-                
+                네이버
               </button>
               <button
                 onClick={() => oauthLogin('google')}
                 className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-red-600 text-red-600 hover:bg-red-50 transition-colors"
               >
-                
+                구글
               </button>
               <button
                 onClick={() => oauthLogin('kakao')}
                 className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-yellow-500 text-yellow-600 hover:bg-yellow-50 transition-colors"
               >
-                
+                카카오
               </button>
             </div>
-          </div>
+
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">

@@ -8,6 +8,8 @@ import MyPage from './pages/MyPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
+import LoginSuccess from './pages/LoginSuccess';
+import OAuthRegister from './pages/OAuthRegister';
 
 export const router = createBrowserRouter([
   {
@@ -30,4 +32,12 @@ export const router = createBrowserRouter([
     path: '/register',
     Component: Register,
   },
+  {
+    path: '/login-success',
+    Component: LoginSuccess
+  },
+  {
+    path: '/oauth-register',
+    Component: OAuthRegister
+  }
 ]);
