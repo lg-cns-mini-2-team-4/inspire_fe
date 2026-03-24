@@ -1,25 +1,27 @@
-import { useClient } from './client';
-import { SignupData, LoginData } from '@schemas/auth';
+import { ScheduleData } from '@schemas/schedule';
+import { useClient } from "./client";
+import { getMonthRange } from '../util/dateUtil';
+import { format } from 'date-fns';
 
-export const authApi = () => {
+export const scheduleApi = () => {
     const api = useClient();
 
-    const signup = async (data: SignupData) => {
-        const res = await api.post('/auth/signup', data);
-        return res.data;
+    const getFavorites = () => api.get('/schedules/favorites');
+
+    const getSchedules = (year?: number, month?: number) => {
+        const { startDate, endDate } = getMonthRange(year, month);
+
+        return api.get('/schedules', {
+            params: {
+                startDate: format(startDate, 'yyyy-MM-dd'),
+                endDate: format(endDate, 'yyyy-MM-dd')
+            }
+        })
     }
 
-    const login = async (data: LoginData) => {
-        const res = await api.post('/auth/login', data);
-        return res.data;
-    }
+    const createSchedule = (data: ScheduleData) => api.post('/schedules', data);
 
-    const logout = () => api.post('/auth/logout');
+    const deleteSchedule = (id: number) => api.delete(`/schedules/${id}`);
 
-    const reissue = async () => {
-        const res = await api.post('/auth/reissue');
-        return res.data;
-    }
-
-    return { signup, login, logout, reissue };
+    return { getFavorites, getSchedules, createSchedule, deleteSchedule };
 };

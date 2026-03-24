@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router';
-import { useAuth } from '../context/AuthContext';
-import { mockExams } from '../data/mockExams';
+import { useUser } from '../hooks/user';
+import { useSchedules } from '../hooks/schedules';
+import { useFavorites } from '../hooks/favorite';
 import {
   User,
   Mail,
@@ -29,6 +30,11 @@ interface PersonalEvent {
 }
 
 export default function MyPage() {
+  const { data: user, isLoading: userLoading, error: userError } = useUser();
+  const { data: schedules, isLoading: scheduleLoading, error: scheduleError } = useSchedules();
+  const { data: favorites, isLoading: favoriteLoading, error: favoriteError } = useFavorites();
+  const navigate = useNavigate();
+
   const [currentMonth, setCurrentMonth] = useState(new Date('2026-03-13'));
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
@@ -42,14 +48,6 @@ export default function MyPage() {
     study: false,
     exam: false,
   });
-
-  // Redirect to login if not authenticated
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  if (!user) {
-    navigate('/login');
-    return null;
-  }
 
   // Mock user profile data
   const [profile, setProfile] = useState({

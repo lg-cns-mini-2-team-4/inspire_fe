@@ -1,5 +1,4 @@
 import { useClient } from './client';
-import { SignupData, LoginData } from '@schemas/auth';
 
 export const userApi = () => {
     const api = useClient();
