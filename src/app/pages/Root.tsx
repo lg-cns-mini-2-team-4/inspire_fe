@@ -6,11 +6,15 @@ import { useFavorites } from '../hooks/favorite';
 
 export default function Root() {
   const location = useLocation();
+<<<<<<< HEAD
   const { logout } = useAuth();
   const { data: user } = useUser();
   const navigate = useNavigate()
 
   console.log(user);
+=======
+  const { accessToken, logout } = useAuth();
+>>>>>>> 5592a0d0139aa834c31c25726f062b342083afa3
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -56,7 +60,7 @@ export default function Root() {
                 <span>캘린더</span>
               </Link>
               
-              {user ? (
+              {accessToken ? (
                 <>
                   <Link
                     to="/mypage"
@@ -65,7 +69,6 @@ export default function Root() {
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                     }`}
-                    title={user.name}
                   >
                     <User className="w-5 h-5" />
                   </Link>

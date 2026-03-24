@@ -26,5 +26,5 @@ export const authApi = () => {
         return res.data;
     }
 
-    return { signup, login, logout, reissue };
+    return { signup, login, logout, reissue, oauthSignup };
 };
