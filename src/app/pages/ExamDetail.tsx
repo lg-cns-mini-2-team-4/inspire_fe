@@ -13,6 +13,7 @@ import {
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { useAuth } from '../context/AuthContext';
+import certApi from '../api/certApi';
 
 // 백엔드 DTO 규격 정의
 interface ScheduleInfo {

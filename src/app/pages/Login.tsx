@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
+import { authApi } from '../api/authApi';
 import { Calendar, Mail, Lock, AlertCircle } from 'lucide-react';
 
 export default function Login() {
+  const api = authApi();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,15 +25,20 @@ export default function Login() {
       return;
     }
 
-    const success = await login(email, password);
-
-    if (success) {
+    try {
+      const res = await api.login({ email, password });
+      login(res.data.accessToken);
       navigate('/');
-    } else {
-      setError('이메일 또는 비밀번호가 일치하지 않습니다.');
+    } catch (err: any) {
+      setError(err.response?.data?.error?.message);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setLoading(false);
+    // OAuth 로그인 버튼 클릭 시 이동할 URL
+  const oauthLogin = (provider: 'naver' | 'google' | 'kakao') => {
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/${provider}`;
   };
 
   return (
@@ -120,6 +128,39 @@ export default function Login() {
                 <span className="px-2 bg-white text-gray-500">또는</span>
               </div>
             </div>
+
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">또는</span>
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-3">
+              <button
+                onClick={() => oauthLogin('naver')}
+                className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-green-600 text-green-600 hover:bg-green-50 transition-colors"
+              >
+                
+              </button>
+              <button
+                onClick={() => oauthLogin('google')}
+                className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-red-600 text-red-600 hover:bg-red-50 transition-colors"
+              >
+                
+              </button>
+              <button
+                onClick={() => oauthLogin('kakao')}
+                className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-yellow-500 text-yellow-600 hover:bg-yellow-50 transition-colors"
+              >
+                
+              </button>
+            </div>
+          </div>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
