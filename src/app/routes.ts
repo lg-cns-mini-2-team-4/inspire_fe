@@ -4,12 +4,12 @@ import Home from './pages/Home';
 import ExamList from './pages/ExamList';
 import ExamDetail from './pages/ExamDetail';
 import CalendarView from './pages/CalendarView';
-import MyPage from './pages/MyPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 import LoginSuccess from './pages/LoginSuccess';
 import OAuthRegister from './pages/OAuthRegister';
+import MyPage from './pages/MyPage';
 
 export const router = createBrowserRouter([
   {

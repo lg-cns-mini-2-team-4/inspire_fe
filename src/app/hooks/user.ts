@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { userApi } from "../api/userApi"
+import { User } from "@models/user";
 
 export const useUser = () => {
     const api = userApi();
 
-    return useQuery({
+    return useQuery<User>({
         queryKey: ['user'],
         queryFn: () => api.getMe(),
         staleTime: 5 * 60 * 1000, // 5 minutes

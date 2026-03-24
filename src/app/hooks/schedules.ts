@@ -1,20 +1,23 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { scheduleApi } from '../api/scheduleApi';
 import { ScheduleData } from '@schemas/schedule';
-import { useAuth } from '../context/AuthContext';
+import { format } from 'date-fns';
+import {getMonthRange} from '../util/dateUtil';
 
-export const useSchedules = (year?: number, month?: number) => {
+export const useSchedules = (calendarStart: Date, calendarEnd: Date) => {
     const api = scheduleApi();
-    const { accessToken } = useAuth();
 
     return useQuery({
-        queryKey: ["schedules", year, month],
-        queryFn: () => api.getSchedules(year, month),
-        enabled: !!accessToken,
+        queryKey: ["schedules", calendarStart, calendarEnd],
+        queryFn: () => api.getSchedules(
+            undefined,
+            format(calendarStart, 'yyyy-MM-dd'),
+            format(calendarEnd, 'yyyy-MM-dd')
+        ),
         staleTime: 5 * 60 * 1000,
         retry: 1
     });
-}
+};
 
 export const useCreateSchedule = () => {
     const api = scheduleApi();
@@ -24,16 +27,15 @@ export const useCreateSchedule = () => {
         mutationFn: (data: ScheduleData) => api.createSchedule(data),
         onSuccess: (_res, variable) => {
             const date = new Date(variable.date);
-            const year = date.getFullYear();
-            const month = date.getMonth() + 1;
-            queryClient.invalidateQueries({ queryKey: ["schedules", year, month] });
+            const { startDate, endDate } = getMonthRange(date);
+            queryClient.invalidateQueries({ queryKey: ["schedules", startDate, endDate] });
 
             if (variable.type === "EXAM") {
                 queryClient.invalidateQueries({ queryKey: ["favorites"] });
             }
         }
     });
-}
+};
 
 export const useDeleteSchedule = () => {
     const api = scheduleApi();
@@ -42,16 +44,14 @@ export const useDeleteSchedule = () => {
     return useMutation({
         mutationFn: (id: number) => api.deleteSchedule(id),
         onSuccess: (res) => {
-            const data = res.data
-            const date = new Date(data.date);
-            const year = date.getFullYear();
-            const month = date.getMonth() + 1;
+            const date = new Date(res.date);
+            const { startDate, endDate } = getMonthRange(date);
 
-            queryClient.invalidateQueries({ queryKey: ["schedules", year, month] });
+            queryClient.invalidateQueries({ queryKey: ["schedules", startDate, endDate] });
 
-            if (data.type === "EXAM") {
+            if (res.type === "EXAM") {
                 queryClient.invalidateQueries({ queryKey: ["favorites"] });
             }
         }
     })
-}
+};

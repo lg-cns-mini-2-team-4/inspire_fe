@@ -5,7 +5,7 @@ export const userApi = () => {
 
     const getMe = async () => {
         const res = await api.get('/users/me');
-        return res.data;
+        return res.data.data;
     }
 
     return { getMe };

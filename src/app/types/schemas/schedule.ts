@@ -1,8 +1,9 @@
 export interface ScheduleData {
-    userId: number;
+    id?: number;
+    userId?: number;
     title: string;
     date: string; // "yyyy-MM-dd"
     type: string; // STUDY, EXAM, DEADLINE, OTHER
-    description: string;
-    refId: number;
+    description: string | undefined;
+    refId?: number;
 }

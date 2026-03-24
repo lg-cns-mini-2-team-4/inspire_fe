@@ -1,27 +1,13 @@
-// import { useQuery } from "@tanstack/react-query";
-// import { scheduleApi } from "../api/scheduleApi"
-// import { useAuth } from "../context/AuthContext";
-
-// export const useFavorites = () => {
-//     const api = scheduleApi();
-//     const { accessToken } = useAuth();
-//     return useQuery({
-//         queryKey: ["favorites"],
-//         queryFn: () => api.getFavorites(),
-//         enabled: !!accessToken,
-//         staleTime: 5 * 60 * 1000,
-//         retry: 1
-//     });
-// }
-
+<<<<<<< Updated upstream
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+=======
+import { useQuery } from "@tanstack/react-query";
+>>>>>>> Stashed changes
 import { scheduleApi } from "../api/scheduleApi";
-import { useAuth } from "../context/AuthContext";
 import { format } from 'date-fns';
 
 export const useFavorites = (today: Date) => {
     const api = scheduleApi();
-    const { accessToken } = useAuth();
 
     return useQuery({
         queryKey: ["favorites"],
@@ -29,6 +15,7 @@ export const useFavorites = (today: Date) => {
         staleTime: 5 * 60 * 1000,
         retry: 1
     });
+<<<<<<< Updated upstream
 };
 
 
@@ -65,4 +52,7 @@ export const useToggleFavorite = () => {
       queryClient.invalidateQueries({ queryKey: ["favorites"] });
     }
   });
+};;
+=======
 };
+>>>>>>> Stashed changes

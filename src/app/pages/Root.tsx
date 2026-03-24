@@ -2,6 +2,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router';
 import { Calendar, Home, User, LogOut, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useUser } from '../hooks/user';
+import { useFavorites } from '../hooks/favorite';
 
 export default function Root() {
   const location = useLocation();
