@@ -27,6 +27,7 @@
 // export type ExamStatus = '접수예정' | '접수중' | '접수마감' | '시험완료';
 
 export interface Exam {
+  id: number;
   itemCode: string;
   itemName: string;
   category: ExamCategory;

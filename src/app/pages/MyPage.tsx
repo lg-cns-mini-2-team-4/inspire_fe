@@ -114,25 +114,6 @@ export default function MyPage() {
         }
     };
 
-<<<<<<< Updated upstream
-=======
-    const getStatusColor = (date: string) => {
-        switch (type) {
-            case '접수예정':
-                return 'bg-gray-100 text-gray-700';
-            case '접수중':
-                return 'bg-green-100 text-green-700';
-            case '접수마감':
-                return 'bg-orange-100 text-orange-700';
-            case '시험완료':
-                return 'bg-blue-100 text-blue-700';
-            default:
-                return 'bg-gray-100 text-gray-700';
-        }
-    };
-
-
->>>>>>> Stashed changes
     const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
     const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
 

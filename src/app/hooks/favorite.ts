@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-=======
-import { useQuery } from "@tanstack/react-query";
->>>>>>> Stashed changes
 import { scheduleApi } from "../api/scheduleApi";
 import { format } from 'date-fns';
 
@@ -15,7 +11,6 @@ export const useFavorites = (today: Date) => {
         staleTime: 5 * 60 * 1000,
         retry: 1
     });
-<<<<<<< Updated upstream
 };
 
 
@@ -53,6 +48,3 @@ export const useToggleFavorite = () => {
     }
   });
 };;
-=======
-};
->>>>>>> Stashed changes

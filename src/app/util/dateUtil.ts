@@ -7,3 +7,7 @@ export const getMonthRange = (baseDate: Date) => {
         endDate: endOfWeek(endOfMonth(baseDate)),
     };
 };
+
+export const getDate = (baseDate: Date) => {
+    return new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());
+}

@@ -183,6 +183,7 @@ import { certApi } from '../api/certApi';
 
 // 백엔드 ExamListResponseDTO 규격에 맞춘 인터페이스
 interface ExamListResponseDTO {
+  id: number;
   itemCode: string;
   itemName: string;
   largeFieldName: string;
@@ -303,7 +304,7 @@ export default function Home() {
             {activeApplications.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {activeApplications.map(exam => (
-                  <ExamCard key={`${exam.itemCode}-${exam.type}`} exam={exam} />
+                  <ExamCard key={`${exam.id}`} exam={exam} />
                 ))}
               </div>
             ) : (
@@ -319,7 +320,7 @@ export default function Home() {
             {upcomingExams.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {upcomingExams.map(exam => (
-                  <ExamCard key={`${exam.itemCode}-${exam.type}`} exam={exam} />
+                  <ExamCard key={`${exam.id}`} exam={exam} />
                 ))}
               </div>
             ) : (

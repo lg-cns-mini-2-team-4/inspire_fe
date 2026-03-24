@@ -22,16 +22,11 @@ export const router = createBrowserRouter([
       { path: 'calendar', Component: CalendarView },
       { path: 'mypage', Component: MyPage },
       { path: '*', Component: NotFound },
+      { path: '/login', Component: Login},
+      { path: '/register', Component: Register},
     ],
   },
-  {
-    path: '/login',
-    Component: Login,
-  },
-  {
-    path: '/register',
-    Component: Register,
-  },
+
   {
     path: '/login-success',
     Component: LoginSuccess

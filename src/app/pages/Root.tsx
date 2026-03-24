@@ -1,20 +1,10 @@
-import { Outlet, Link, useLocation, useNavigate } from 'react-router';
+import { Outlet, Link, useLocation } from 'react-router';
 import { Calendar, Home, User, LogOut, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useUser } from '../hooks/user';
-import { useFavorites } from '../hooks/favorite';
 
 export default function Root() {
   const location = useLocation();
-<<<<<<< HEAD
-  const { logout } = useAuth();
-  const { data: user } = useUser();
-  const navigate = useNavigate()
-
-  console.log(user);
-=======
   const { accessToken, logout } = useAuth();
->>>>>>> 5592a0d0139aa834c31c25726f062b342083afa3
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -23,7 +13,6 @@ export default function Root() {
   const handleLogout = () => {
     if (window.confirm('로그아웃 하시겠습니까?')) {
       logout();
-      navigate('/');
     }
   };
 
