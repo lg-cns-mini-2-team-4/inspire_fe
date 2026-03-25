@@ -5,7 +5,7 @@ export const certApi = () => {
 
     // Home 화면용 요약 데이터 (통계 및 접수/예정 목록 3개씩)
     const getExamSummary = async () => {
-        const res = await api.get('/certs/exams/summary');
+        const res = await api.get('/certificate-service/certs/exams/summary');
         return res.data.data;
     };
 
