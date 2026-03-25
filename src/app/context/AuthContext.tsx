@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const reissue = async (): Promise<string | null> => {
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/auth/reissue`,
+        `${import.meta.env.VITE_API_BASE_URL}/auth-service/auth/reissue`,
         {},
         { withCredentials: true }
       );
@@ -35,9 +35,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // useEffect(() => {
-  //   reissue();
-  // }, []);
+  useEffect(() => {
+    reissue();
+  }, []);
 
   return (
     <AuthContext.Provider value={{ accessToken: token, login, logout, reissue }}>

@@ -4,7 +4,7 @@ export const userApi = () => {
     const api = useClient();
 
     const getMe = async () => {
-        const res = await api.get('/users/me');
+        const res = await api.get('user-service/users/me');
         return res.data.data;
     }
 
