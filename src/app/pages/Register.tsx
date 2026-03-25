@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
+import { authApi } from '../api/authApi';
 import { Calendar, Mail, Lock, User, Phone, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function Register() {
+  const auth = authApi();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,7 +15,6 @@ export default function Register() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,21 +47,20 @@ export default function Register() {
       setLoading(false);
       return;
     }
+    try {
+      const res = await auth.signup({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone
+      });
 
-    const success = await register(
-      formData.name,
-      formData.email,
-      formData.password,
-      formData.phone
-    );
-
-    if (success) {
       navigate('/');
-    } else {
-      setError('이미 존재하는 이메일입니다.');
+    } catch (err: any) {
+      setError(err.response?.data?.error?.message);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const passwordStrength = () => {

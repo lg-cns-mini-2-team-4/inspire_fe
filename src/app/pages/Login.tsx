@@ -1,9 +1,15 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
+import { authApi } from '../api/authApi';
 import { Calendar, Mail, Lock, AlertCircle } from 'lucide-react';
+import kakaoIcon from '../../assets/kakao_icons.png'; 
+import naverIcon from '../../assets/naver_icon.png'; 
+import googleIcon from '../../assets/google_icon.png';
 
 export default function Login() {
+  const api = authApi();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,15 +28,20 @@ export default function Login() {
       return;
     }
 
-    const success = await login(email, password);
-
-    if (success) {
+    try {
+      const res = await api.login({ email, password });
+      login(res.data.accessToken);
       navigate('/');
-    } else {
-      setError('이메일 또는 비밀번호가 일치하지 않습니다.');
+    } catch (err: any) {
+      setError(err.response?.data?.error?.message);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setLoading(false);
+  // OAuth 로그인 버튼 클릭 시 이동할 URL
+  const oauthLogin = (provider: 'naver' | 'google' | 'kakao') => {
+    window.location.href = `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/${provider}`;
   };
 
   return (
@@ -111,6 +122,7 @@ export default function Login() {
             </button>
           </form>
 
+
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -120,6 +132,36 @@ export default function Login() {
                 <span className="px-2 bg-white text-gray-500">또는</span>
               </div>
             </div>
+
+            <div className="mt-6 space-y-3 w-full max-w-sm mx-auto">
+              {/* 카카오 버튼 */}
+              <button
+                onClick={() => oauthLogin('kakao')}
+                className="w-full flex items-center justify-center gap-3 py-4 px-4 rounded-xl bg-[#FEE500] text-[#191919] font-medium hover:bg-[#FADA0A] transition-colors"
+              >
+                <img src={kakaoIcon} alt="카카오톡" className="w-8 h-8" />
+                <span className="flex-1 text-center pr-6">카카오톡으로 계속하기</span>
+              </button>
+
+              {/* 네이버 버튼 */}
+              <button
+                onClick={() => oauthLogin('naver')}
+                className="w-full flex items-center justify-center gap-3 py-4 px-4 rounded-xl bg-[#03C75A] text-white font-medium hover:bg-[#02b351] transition-colors"
+              >
+                <img src={naverIcon} alt="네이버" className="w-8 h-8" />
+                <span className="flex-1 text-center pr-6">네이버로 계속하기</span>
+              </button>
+
+              {/* 구글 버튼 */}
+              <button
+                onClick={() => oauthLogin('google')}
+                className="w-full flex items-center justify-center gap-3 py-4 px-4 rounded-xl bg-[#F2F2F2] text-[#191919] font-medium hover:bg-[#E5E5E5] transition-colors"
+              >
+                <img src={googleIcon} alt="구글" className="w-8 h-8" />
+                <span className="flex-1 text-center pr-6">구글로 계속하기</span>
+              </button>
+            </div>
+
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">

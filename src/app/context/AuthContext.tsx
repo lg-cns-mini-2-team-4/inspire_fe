@@ -1,153 +1,53 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  bio?: string;
-  favoriteExams?: string[];
-}
-
-interface AuthContextType {
-  user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string, phone?: string) => Promise<boolean>;
-  logout: () => void;
-  updateProfile: (userData: Partial<User>) => void;
-  toggleFavoriteExam: (examId: string) => void;
-  isFavoriteExam: (examId: string) => boolean;
-}
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { AuthContextType } from '@models/auth';
+import axios from 'axios';
+import { useQueryClient } from '@tanstack/react-query';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
-  useEffect(() => {
-    // Check if user is logged in from localStorage
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+  const queryClient = useQueryClient();
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Get users from localStorage
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    
-    // Find user with matching email and password
-    const foundUser = users.find(
-      (u: any) => u.email === email && u.password === password
-    );
+  const [token, setToken] = useState<string | null>(null);
 
-    if (foundUser) {
-      const { password, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
-      return true;
-    }
-
-    return false;
-  };
-
-  const register = async (
-    name: string,
-    email: string,
-    password: string,
-    phone?: string
-  ): Promise<boolean> => {
-    // Get existing users from localStorage
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-
-    // Check if email already exists
-    if (users.some((u: any) => u.email === email)) {
-      return false;
-    }
-
-    // Create new user
-    const newUser = {
-      id: Date.now().toString(),
-      name,
-      email,
-      password,
-      phone: phone || '',
-      bio: '',
-      favoriteExams: [],
-    };
-
-    // Add to users array and save
-    users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(users));
-
-    // Auto login after registration
-    const { password: _, ...userWithoutPassword } = newUser;
-    setUser(userWithoutPassword);
-    localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
-
-    return true;
-  };
+  const login = (newToken: string) => setToken(newToken);
 
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem('currentUser');
+    setToken(null);
+    queryClient.removeQueries({ queryKey: ['schedules'] });
+    queryClient.removeQueries({ queryKey: ['favorites'] });
+    queryClient.removeQueries({ queryKey: ['user'] });
   };
 
-  const updateProfile = (userData: Partial<User>) => {
-    if (!user) return;
-
-    const updatedUser = { ...user, ...userData };
-    setUser(updatedUser);
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-
-    // Also update in users array
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const userIndex = users.findIndex((u: any) => u.id === user.id);
-    if (userIndex !== -1) {
-      users[userIndex] = { ...users[userIndex], ...userData };
-      localStorage.setItem('users', JSON.stringify(users));
+  const reissue = async (): Promise<string | null> => {
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/auth/reissue`,
+        {},
+        { withCredentials: true }
+      );
+      login(res.data.data.accessToken);
+      return res.data.data.accessToken;
+    } catch {
+      logout();
+      return null;
     }
   };
 
-  const toggleFavoriteExam = (examId: string) => {
-    if (!user) return;
-
-    const currentFavorites = user.favoriteExams || [];
-    const isFavorite = currentFavorites.includes(examId);
-    
-    const updatedFavorites = isFavorite
-      ? currentFavorites.filter(id => id !== examId)
-      : [...currentFavorites, examId];
-
-    const updatedUser = { ...user, favoriteExams: updatedFavorites };
-    setUser(updatedUser);
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-
-    // Also update in users array
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const userIndex = users.findIndex((u: any) => u.id === user.id);
-    if (userIndex !== -1) {
-      users[userIndex] = { ...users[userIndex], favoriteExams: updatedFavorites };
-      localStorage.setItem('users', JSON.stringify(users));
-    }
-  };
-
-  const isFavoriteExam = (examId: string) => {
-    if (!user) return false;
-    return (user.favoriteExams || []).includes(examId);
-  };
+  useEffect(() => {
+    reissue();
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, updateProfile, toggleFavoriteExam, isFavoriteExam }}>
+    <AuthContext.Provider value={{ accessToken: token, login, logout, reissue }}>
       {children}
     </AuthContext.Provider>
-  );
+  )
 }
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
-}
+};

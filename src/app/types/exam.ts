@@ -27,47 +27,23 @@
 // export type ExamStatus = '접수예정' | '접수중' | '접수마감' | '시험완료';
 
 export interface Exam {
-  id: string;
-  name: string;
+  id: number;
+  itemCode: string;
+  itemName: string;
   category: ExamCategory;
-  
-  // 1. 필기 일정 (백엔드 written... 대응)
-  writtenRegStart: string;
-  writtenRegEnd: string;
-  writtenExamStart: string;
-  writtenExamEnd: string;
-  
-  // 2. 실기 일정 (백엔드 practical... 대응)
-  practicalRegStart: string;
-  practicalRegEnd: string;
-  practicalExamStart: string;
-  practicalExamEnd: string;
-
-  // 3. 기존 필드 및 공통 정보
-  testDate: string;             // UI 호환성을 위해 writtenExamStart를 주로 할당
-  applicationStartDate: string; // writtenRegStart 할당
-  applicationEndDate: string;   // writtenRegEnd 할당
-  
+  type: 'WR' | 'WE' | 'PR' | 'PE' | 'PD'; // 필기접수, 필기시험 등
+  startDate: string;
+  endDate: string;
   description?: string;
-  organizationName: string;     // 백엔드의 officeName 대응
-  location?: string;            // 백엔드의 examLocation 대응
-  status: ExamStatus;
-  
-  // 선택적 상세 정보
-  resultDate?: string;
-  website?: string;
-  eligibility?: string;
-  subjects?: string[];
+  status: ExamStatus | string;
+
 }
 
 export type ExamCategory =
-  | '공무원'
-  | '교육'
-  | '의료'
-  | '기술/기능'
-  | '금융'
-  | '법률'
-  | '정보통신' // 스크린샷의 'IT' 대응을 위해 추가 권장
-  | '기타';
+  | '재료' | '기계' | '화학' | '전기.전자' | '건설' | '섬유.의복' | '광업자원'
+  | '정보통신' | '농림어업' | '안전관리' | '경영.회계.사무' | '식품.가공'
+  | '환경.에너지' | '문화.예술.디자인.방송' | '인쇄.목재.가구.공예' | '운전.운송'
+  | '음식서비스' | '이용.숙박.여행.오락.스포츠' | '보건.의료' | '사회복지.종교'
+  | '영업.판매' | '교육.자연.과학.사회과학' | '사업관리' | '기타';
 
-export type ExamStatus = '접수예정' | '접수중' | '접수마감' | '시험완료';
+export type ExamStatus = '접수예정' | '접수중';

@@ -1,379 +1,363 @@
-// import { useState, useMemo } from 'react';
+// import { useState, useEffect } from 'react';
 // import { Link } from 'react-router';
-// import { mockExams } from '../data/mockExams';
 // import { ExamCard } from '../components/ExamCard';
-// import {
-//   Calendar,
-//   TrendingUp,
-//   Clock,
-//   CheckCircle,
-//   ArrowRight,
-// } from 'lucide-react';
-// import { format, isAfter, isBefore } from 'date-fns';
+// import { Exam, ExamCategory, ExamStatus } from '../types/exam';
+// import { Calendar, TrendingUp, Clock, CheckCircle, ArrowRight } from 'lucide-react';
+// import { format } from 'date-fns';
 // import { ko } from 'date-fns/locale';
+// import { certApi } from '../api/certApi';
+
+// // 백엔드 ExamListResponseDTO 규격에 맞춘 인터페이스
+// interface ExamListResponseDTO {
+//   itemCode: string;
+//   itemName: string;
+//   largeFieldName: string;
+//   type: string;
+//   startDate: string;
+//   endDate: string;
+//   description: string;
+// }
+
+// // 백엔드 ExamCountResponseDTO 규격과 1:1 매칭
+// interface ExamCountResponseDTO {
+//   totalCount: number;
+//   activeCount: number;
+//   upcomingCount: number;
+// }
+
+// // 백엔드 전체 응답 구조
+// interface ExamSummaryResponse {
+//   counts: ExamCountResponseDTO;
+//   activeExams: ExamListResponseDTO[];
+//   upcomingExams: ExamListResponseDTO[];
+// }
 
 // export default function Home() {
-//   const [currentDate] = useState(new Date('2026-03-13')); // 하드코딩
+//   const { getExamSummary } = certApi();
 
-//   const stats = useMemo(() => { // mockExams에 하드코딩된 데이터 기반
-//     const total = mockExams.length;
-//     const upcoming = mockExams.filter((exam) =>
-//       isAfter(new Date(exam.testDate), currentDate)
-//     ).length;
-//     const inProgress = mockExams.filter(
-//       (exam) => exam.status === '접수중'
-//     ).length;
-//     const completed = mockExams.filter(
-//       (exam) => exam.status === '시험완료'
-//     ).length;
+//   // 상태 관리
+//   const [stats, setStats] = useState<ExamCountResponseDTO>({
+//     totalCount: 0,
+//     upcomingCount: 0,
+//     activeCount: 0
+//   });
 
-//     return { total, upcoming, inProgress, completed };
-//   }, [currentDate]);
+//   const [currentDate] = useState(new Date()); // 오늘 날짜
+//   const [activeApplications, setActiveApplications] = useState<Exam[]>([]);
+//   const [upcomingExams, setUpcomingExams] = useState<Exam[]>([]);
 
-//   const upcomingExams = useMemo(() => { // mockExams에 하드코딩된 데이터 기반 - 다가오는 시험 3개
-//     return mockExams
-//       .filter((exam) => isAfter(new Date(exam.testDate), currentDate))
-//       .sort(
-//         (a, b) =>
-//           new Date(a.testDate).getTime() - new Date(b.testDate).getTime()
-//       )
-//       .slice(0, 3);
-//   }, [currentDate]);
+//   const [isLoading, setIsLoading] = useState(true);
 
-//   const activeApplications = useMemo(() => { // mockExams에 하드코딩된 데이터 기반 - 접수중인 시험
-//     return mockExams.filter((exam) => exam.status === '접수중');
+//   // 백엔드 DTO를 프론트엔드 Exam 타입으로 변환하는 함수
+//   const mapDtoToExam = (dto: ExamListResponseDTO, status: string): Exam => ({
+//     id: `${dto.itemCode}-${dto.type}-${status}`, // 고유 키 생성
+//     itemCode: dto.itemCode,
+//     itemName: dto.itemName,
+//     category: dto.largeFieldName as ExamCategory,
+//     type: dto.type as any, // WR, WE 등
+//     startDate: dto.startDate,
+//     endDate: dto.endDate,
+//     description: dto.description,
+//     status: status as ExamStatus,
+//   });
+
+//   useEffect(() => {
+//       const loadHomeData = async () => {
+//         try {
+//           setIsLoading(true);
+//           // GET /certs/exams/summary 호출
+//           const data: ExamSummaryResponse = await getExamSummary();
+//           console.log("백엔드에서 온 생데이터:", data);
+//           if (data) {
+//           // 통계 데이터 설정
+//           setStats(data.counts);
+          
+//           // 리스트 데이터 변환 및 설정
+//           setActiveApplications(
+//             data.activeExams.map(dto => mapDtoToExam(dto, '접수중'))
+//           );
+//           setUpcomingExams(
+//             data.upcomingExams.map(dto => mapDtoToExam(dto, '접수예정'))
+//           );
+//         }
+//       } catch (error) {
+//         console.error('홈 데이터 로드 실패:', error);
+//       } finally {
+//         setIsLoading(false);
+//       }
+//     };
+//     loadHomeData();
 //   }, []);
+
 
 //   return (
 //     <div className="space-y-8">
-//       {/* Hero Section */}
-//       <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-8 text-white">
+//       <div className="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl p-8 text-white shadow-lg">
 //         <h1 className="text-3xl font-bold mb-2">국가시험 일정 관리 시스템</h1>
-//         <p className="text-blue-100 mb-6">
-//           모든 국가시험 정보를 한 곳에서 관리하세요
-//         </p>
-//         <div className="text-sm text-blue-100">
-//           오늘 날짜: {format(currentDate, 'yyyy년 M월 d일 (EEEE)', { locale: ko })}
+//         <p className="text-blue-100 opacity-90">종목별 상세 직무 분야와 실시간 시험 일정을 확인하세요</p>
+//         <div className="mt-6 inline-flex items-center px-4 py-2 bg-white/10 rounded-full text-sm backdrop-blur-sm">
+//           오늘 날짜: {format(currentDate, 'yyyy. MM. d (EEEE)', { locale: ko })}
 //         </div>
 //       </div>
 
-//       {/* Stats */}
-//       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-//         <div className="bg-white rounded-lg border border-gray-200 p-6">
-//           <div className="flex items-center justify-between">
-//             <div>
-//               <p className="text-sm text-gray-600 mb-1">전체 시험</p>
-//               <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
-//             </div>
-//             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-//               <Calendar className="w-6 h-6 text-blue-600" />
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="bg-white rounded-lg border border-gray-200 p-6">
-//           <div className="flex items-center justify-between">
-//             <div>
-//               <p className="text-sm text-gray-600 mb-1">예정된 시험</p>
-//               <p className="text-3xl font-bold text-gray-900">
-//                 {stats.upcoming}
-//               </p>
-//             </div>
-//             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-//               <TrendingUp className="w-6 h-6 text-green-600" />
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="bg-white rounded-lg border border-gray-200 p-6">
-//           <div className="flex items-center justify-between">
-//             <div>
-//               <p className="text-sm text-gray-600 mb-1">접수중</p>
-//               <p className="text-3xl font-bold text-gray-900">
-//                 {stats.inProgress}
-//               </p>
-//             </div>
-//             <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-//               <Clock className="w-6 h-6 text-orange-600" />
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="bg-white rounded-lg border border-gray-200 p-6">
-//           <div className="flex items-center justify-between">
-//             <div>
-//               <p className="text-sm text-gray-600 mb-1">완료된 시험</p>
-//               <p className="text-3xl font-bold text-gray-900">
-//                 {stats.completed}
-//               </p>
-//             </div>
-//             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-//               <CheckCircle className="w-6 h-6 text-purple-600" />
-//             </div>
-//           </div>
-//         </div>
+//       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//         <StatCard
+//           title="전체 시험"
+//           count={stats.totalCount}
+//           icon={<Calendar className="text-blue-600" />}
+//           color="bg-blue-100"
+//         />
+//         <StatCard
+//           title="접수 중"
+//           count={stats.activeCount}
+//           icon={<Clock className="text-orange-600" />}
+//           color="bg-orange-100"
+//         />
+//         <StatCard
+//           title="접수 예정"
+//           count={stats.upcomingCount}
+//           icon={<TrendingUp className="text-green-600" />}
+//           color="bg-green-100"
+//         />
 //       </div>
 
-//       {/* Active Applications */}
-//       {activeApplications.length > 0 && (
-//         <div>
-//           <div className="flex justify-between items-center mb-4">
-//             <h2 className="text-2xl font-bold text-gray-900">
-//               현재 접수중인 시험
-//             </h2>
-//             <Link
-//               to="/exams?status=접수중"
-//               className="text-blue-600 hover:text-blue-700 flex items-center gap-1 text-sm"
-//             >
-//               전체보기 <ArrowRight className="w-4 h-4" />
-//             </Link>
-//           </div>
-//           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//             {activeApplications.map((exam) => (
-//               <ExamCard key={exam.id} exam={exam} />
-//             ))}
-//           </div>
+//       {!isLoading && (
+//         <div className="space-y-12">
+//           {activeApplications.length > 0 && (
+//             <section>
+//               <SectionHeader title="현재 접수 중인 시험" link="/exams?status=접수중" />
+//               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//                 {activeApplications.map(exam => <ExamCard key={exam.id} exam={exam} />)}
+//               </div>
+//             </section>
+//           )}
+//           {upcomingExams.length > 0 && (
+//             <section>
+//               <SectionHeader title="다가오는 시험" link="/exams" />
+//               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//                 {upcomingExams.map(exam => <ExamCard key={exam.id} exam={exam} />)}
+//               </div>
+//             </section>
+//           )}
 //         </div>
 //       )}
+//     </div>
+//   );
+// }
 
-//       {/* Upcoming Exams */}
-//       <div>
-//         <div className="flex justify-between items-center mb-4">
-//           <h2 className="text-2xl font-bold text-gray-900">다가오는 시험</h2>
-//           <Link
-//             to="/exams"
-//             className="text-blue-600 hover:text-blue-700 flex items-center gap-1 text-sm"
-//           >
-//             전체보기 <ArrowRight className="w-4 h-4" />
-//           </Link>
+// function SectionHeader({ title, link }: { title: string; link: string }) {
+//   return (
+//     <div className="flex justify-between items-center mb-6">
+//       <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+//       <Link to={link} className="text-blue-600 hover:text-blue-700 flex items-center gap-1 text-sm font-semibold">
+//         전체보기 <ArrowRight className="w-4 h-4" />
+//       </Link>
+//     </div>
+//   );
+// }
+
+// function StatCard({ title, count, icon, color }: { title: string; count: number; icon: React.ReactNode; color: string }) {
+//   return (
+//     <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+//       <div className="flex items-center justify-between">
+//         <div>
+//           <p className="text-xs font-bold text-gray-400 uppercase mb-1">{title}</p>
+//           <p className="text-3xl font-bold text-gray-900">{count}</p>
 //         </div>
-//         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-//           {upcomingExams.map((exam) => (
-//             <ExamCard key={exam.id} exam={exam} />
-//           ))}
-//         </div>
+//         <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center`}>{icon}</div>
 //       </div>
 //     </div>
 //   );
 // }
 
-import { useState, useMemo, useEffect } from 'react';
+////////////////////////////////////////////////
+
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
-import { mockExams } from '../data/mockExams';
 import { ExamCard } from '../components/ExamCard';
-import { Exam, ExamCategory } from '../types/exam';
-import { ExamStatus} from '../types/exam';
-import {
-  Calendar,
-  TrendingUp,
-  Clock,
-  CheckCircle,
-  ArrowRight,
-} from 'lucide-react';
+import { Exam, ExamCategory, ExamStatus } from '../types/exam';
+import { Calendar, TrendingUp, Clock, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { certApi } from '../api/certApi';
 
-// 1. 백엔드 DTO 규격 정의
-interface ScheduleResponseDTO {
+// 백엔드 ExamListResponseDTO 규격에 맞춘 인터페이스
+interface ExamListResponseDTO {
+  id: number;
   itemCode: string;
   itemName: string;
   largeFieldName: string;
-  description: string;      // 추가
-  officeName: string;
-  examLocation: string;
-  writtenRegStart: string;
-  writtenRegEnd: string;
-  writtenExamStart: string;
-  writtenExamEnd: string;
-  practicalRegStart: string; // 추가
-  practicalRegEnd: string;   // 추가
-  practicalExamStart: string;// 추가
-  practicalExamEnd: string;  // 추가
+  type: string;
+  startDate: string;
+  endDate: string;
+  description: string;
 }
 
-// 상단 통계 DTO 규격
-interface StatsResponseDTO {
+// 백엔드 ExamCountResponseDTO 규격과 1:1 매칭
+interface ExamCountResponseDTO {
   totalCount: number;
-  upcomingCount: number;
   activeCount: number;
-  completedCount: number;
+  upcomingCount: number;
+}
+
+// 백엔드 전체 응답 구조
+interface ExamSummaryResponse {
+  counts: ExamCountResponseDTO;
+  activeExams: ExamListResponseDTO[];
+  upcomingExams: ExamListResponseDTO[];
 }
 
 export default function Home() {
-  // 기준 날짜
-  const [currentDate] = useState(new Date('2026-03-13'));
-  
+  const { getExamSummary } = certApi();
+
   // 상태 관리
-  const [activeApplications, setActiveApplications] = useState<Exam[]>([]);
-  const [upcomingExams, setUpcomingExams] = useState<Exam[]>([]);
-  const [stats, setStats] = useState<StatsResponseDTO>({
+  const [stats, setStats] = useState<ExamCountResponseDTO>({
     totalCount: 0,
     upcomingCount: 0,
-    activeCount: 0,
-    completedCount: 0
+    activeCount: 0
   });
+  const [currentDate] = useState(new Date()); // 오늘 날짜
+  const [activeApplications, setActiveApplications] = useState<Exam[]>([]);
+  const [upcomingExams, setUpcomingExams] = useState<Exam[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 데이터 매핑 함수 (타입 단언 as ExamCategory 추가)
-  const mapDtoToExam = (dto: ScheduleResponseDTO, status: string): Exam => ({
-    id: dto.itemCode,
-    name: dto.itemName,
-    category: dto.largeFieldName as ExamCategory,
-    status: status as ExamStatus,
-    // 신규 날짜 필드 전수 매핑
-    writtenRegStart: dto.writtenRegStart,
-    writtenRegEnd: dto.writtenRegEnd,
-    writtenExamStart: dto.writtenExamStart,
-    writtenExamEnd: dto.writtenExamEnd,
-    practicalRegStart: dto.practicalRegStart,
-    practicalRegEnd: dto.practicalRegEnd,
-    practicalExamStart: dto.practicalExamStart,
-    practicalExamEnd: dto.practicalExamEnd,
-    // 하위 호환성을 위한 기존 필드 매핑
-    testDate: dto.writtenExamStart,
-    applicationStartDate: dto.writtenRegStart,
-    applicationEndDate: dto.writtenRegEnd,
-    organizationName: dto.officeName,
-    location: dto.examLocation,
+  // 백엔드 DTO를 프론트엔드 Exam 타입으로 변환하는 함수
+  const mapDTOToExam = (dto: ExamListResponseDTO, status: string): any => ({
+    itemCode: dto.itemCode,
+    itemName: dto.itemName,
+    category: dto.largeFieldName,
+    type: dto.type, 
+    startDate: dto.startDate,
+    endDate: dto.endDate,
     description: dto.description,
+    status: status,
   });
 
   useEffect(() => {
-    const fetchAllData = async () => {
+    const loadHomeData = async () => {
       try {
         setIsLoading(true);
-        // 세 가지 API를 병렬로 호출 (통계 API 주소는 관례에 따라 /status-counts로 가정합니다)
-        const [activeRes, upcomingRes, statsRes] = await Promise.all([
-          fetch('http://localhost:8080/api/schedules/active'),
-          fetch('http://localhost:8080/api/schedules/upcoming'),
-          fetch('http://localhost:8080/api/schedules/status-counts') 
-        ]);
+        const data: ExamSummaryResponse = await getExamSummary();
+        console.log("백엔드에서 온 생데이터:", data);
+        if (data && data.counts) {
+          setStats(data.counts);
+          
+          if (data.activeExams) {
+            console.log("접수 중 시험 데이터:", data.activeExams);
+            setActiveApplications(
+              data.activeExams.map(dto => mapDTOToExam(dto, '접수중'))
+            );
+          }
 
-        if (!activeRes.ok || !upcomingRes.ok || !statsRes.ok) {
-          throw new Error('데이터 로딩 실패');
+          if (data.upcomingExams) {
+            console.log("접수 예정 시험 데이터:", data.upcomingExams);
+            setUpcomingExams(
+              data.upcomingExams.map(dto => mapDTOToExam(dto, '접수예정'))
+            );
+          }
         }
-
-        const activeData: ScheduleResponseDTO[] = await activeRes.json();
-        const upcomingData: ScheduleResponseDTO[] = await upcomingRes.json();
-        const statsData: StatsResponseDTO = await statsRes.json();
-
-        setActiveApplications(activeData.map(dto => mapDtoToExam(dto, '접수중')));
-        setUpcomingExams(upcomingData.map(dto => mapDtoToExam(dto, '접수예정')));
-        setStats(statsData);
       } catch (error) {
-        console.error('API 호출 에러:', error);
+        console.error('홈 데이터 로드 실패:', error);
       } finally {
         setIsLoading(false);
       }
     };
-
-    fetchAllData();
+    loadHomeData();
   }, []);
 
   return (
     <div className="space-y-8">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-lg p-8 text-white">
+      <div className="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl p-8 text-white shadow-lg">
         <h1 className="text-3xl font-bold mb-2">국가시험 일정 관리 시스템</h1>
-        <p className="text-blue-100 mb-6">모든 국가시험 정보를 한 곳에서 관리하세요</p>
-        <div className="text-sm text-blue-100">
-          오늘 날짜: {format(currentDate, 'yyyy년 M월 d일 (EEEE)', { locale: ko })}
+        <p className="text-blue-100 opacity-90">종목별 상세 직무 분야와 실시간 시험 일정을 확인하세요</p>
+        <div className="mt-6 inline-flex items-center px-4 py-2 bg-white/10 rounded-full text-sm backdrop-blur-sm">
+          오늘 날짜: {format(currentDate, 'yyyy. MM. d (EEEE)', { locale: ko })}
         </div>
       </div>
 
-      {/* Stats Section - 백엔드 JSON 데이터 반영 및 명칭 변경 */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* 전체 시험 */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">전체 시험</p>
-              <p className="text-3xl font-bold text-gray-900">{stats.totalCount}</p>
-            </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-blue-600" />
-            </div>
-          </div>
-        </div>
-
-        {/* 접수 예정 */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">접수 예정</p>
-              <p className="text-3xl font-bold text-gray-900">{stats.upcomingCount}</p>
-            </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-green-600" />
-            </div>
-          </div>
-        </div>
-
-        {/* 접수 중 */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">접수 중</p>
-              <p className="text-3xl font-bold text-gray-900">{stats.activeCount}</p>
-            </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <Clock className="w-6 h-6 text-orange-600" />
-            </div>
-          </div>
-        </div>
-
-        {/* 접수 종료 */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">접수 종료</p>
-              <p className="text-3xl font-bold text-gray-900">{stats.completedCount}</p>
-            </div>
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-purple-600" />
-            </div>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StatCard
+          title="전체 시험"
+          count={stats.totalCount}
+          icon={<Calendar className="text-blue-600" />}
+          color="bg-blue-100"
+        />
+        <StatCard
+          title="접수 중"
+          count={stats.activeCount}
+          icon={<Clock className="text-orange-600" />}
+          color="bg-orange-100"
+        />
+        <StatCard
+          title="접수 예정"
+          count={stats.upcomingCount}
+          icon={<TrendingUp className="text-green-600" />}
+          color="bg-green-100"
+        />
       </div>
 
-      {/* 로딩 표시 */}
-      {isLoading && (
-        <div className="py-10 text-center text-gray-500 font-medium">데이터를 불러오는 중...</div>
-      )}
+      {!isLoading && (
+        <div className="space-y-12">
 
-      {/* 1. 현재 접수 중인 시험 */}
-      {!isLoading && activeApplications.length > 0 && (
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">현재 접수 중인 시험</h2>
-            <Link to="/exams?status=접수중" className="text-blue-600 hover:text-blue-700 flex items-center gap-1 text-sm">
-              전체보기 <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {activeApplications.map((exam) => (
-              <ExamCard key={exam.id} exam={exam} />
-            ))}
-          </div>
+          <section>
+            <SectionHeader title="접수 중" link="/exams?status=active" />
+            {activeApplications.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {activeApplications.map(exam => (
+                  <ExamCard key={`${exam.id}`} exam={exam} />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                <Clock className="w-12 h-12 text-gray-300 mb-3" />
+                <p className="text-lg font-medium">현재 접수 중인 시험이 없습니다.</p>
+              </div>
+            )}
+          </section>
+
+          <section>
+            <SectionHeader title="접수 예정" link="/exams?status=upcoming" />
+            {upcomingExams.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {upcomingExams.map(exam => (
+                  <ExamCard key={`${exam.id}`} exam={exam} />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                <Clock className="w-12 h-12 text-gray-300 mb-3" />
+                <p className="text-lg font-medium">접수 예정인 시험이 없습니다.</p>
+              </div>
+            )}
+          </section>
         </div>
       )}
+    </div>
+  );
+}
 
-      {/* 2. 다가오는 시험 */}
-      {!isLoading && upcomingExams.length > 0 && (
+
+function SectionHeader({ title, link }: { title: string; link: string }) {
+  return (
+    <div className="flex justify-between items-center mb-6">
+      <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+      <Link to={link} className="text-blue-600 hover:text-blue-700 flex items-center gap-1 text-sm font-semibold">
+        전체보기 <ArrowRight className="w-4 h-4" />
+      </Link>
+    </div>
+  );
+}
+
+function StatCard({ title, count, icon, color }: { title: string; count: number; icon: React.ReactNode; color: string }) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+      <div className="flex items-center justify-between">
         <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">다가오는 시험</h2>
-            <Link to="/exams" className="text-blue-600 hover:text-blue-700 flex items-center gap-1 text-sm">
-              전체보기 <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {upcomingExams.map((exam) => (
-              <ExamCard key={exam.id} exam={exam} />
-            ))}
-          </div>
+          <p className="text-xs font-bold text-gray-400 uppercase mb-1">{title}</p>
+          <p className="text-3xl font-bold text-gray-900">{count}</p>
         </div>
-      )}
+        <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center`}>{icon}</div>
+      </div>
     </div>
   );
 }

@@ -4,10 +4,12 @@ import Home from './pages/Home';
 import ExamList from './pages/ExamList';
 import ExamDetail from './pages/ExamDetail';
 import CalendarView from './pages/CalendarView';
-import MyPage from './pages/MyPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
+import LoginSuccess from './pages/LoginSuccess';
+import OAuthRegister from './pages/OAuthRegister';
+import MyPage from './pages/MyPage';
 
 export const router = createBrowserRouter([
   {
@@ -20,14 +22,17 @@ export const router = createBrowserRouter([
       { path: 'calendar', Component: CalendarView },
       { path: 'mypage', Component: MyPage },
       { path: '*', Component: NotFound },
+      { path: '/login', Component: Login},
+      { path: '/register', Component: Register},
     ],
   },
+
   {
-    path: '/login',
-    Component: Login,
+    path: '/login-success',
+    Component: LoginSuccess
   },
   {
-    path: '/register',
-    Component: Register,
-  },
+    path: '/oauth-register',
+    Component: OAuthRegister
+  }
 ]);

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Root() {
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { accessToken, logout } = useAuth();
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -49,7 +49,7 @@ export default function Root() {
                 <span>캘린더</span>
               </Link>
               
-              {user ? (
+              {accessToken ? (
                 <>
                   <Link
                     to="/mypage"
@@ -58,7 +58,6 @@ export default function Root() {
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                     }`}
-                    title={user.name}
                   >
                     <User className="w-5 h-5" />
                   </Link>

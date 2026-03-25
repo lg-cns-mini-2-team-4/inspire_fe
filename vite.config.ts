@@ -14,9 +14,12 @@ export default defineConfig({
     alias: {
       // Alias @ to the src directory
       '@': path.resolve(__dirname, './src'),
+      '@schemas': path.resolve(__dirname, './src/app/types/schemas'),
+      '@models': path.resolve(__dirname, './src/app/types/models')
     },
   },
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
+
 })
