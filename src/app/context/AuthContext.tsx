@@ -35,9 +35,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  useEffect(() => {
-    reissue();
-  }, []);
+  // useEffect(() => {
+  //   reissue();
+  // }, []);
 
   return (
     <AuthContext.Provider value={{ accessToken: token, login, logout, reissue }}>
